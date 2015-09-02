@@ -15,10 +15,19 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 
 /**
  * Created by S01L02 on 7/10/2015.
@@ -84,7 +93,73 @@ public class RegisterActivity extends Activity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+
+                URL url = null;
+                try {
+                    url = new URL("https://google.com");
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+
+                HttpURLConnection connection = null;
+                try {
+                    connection = (HttpURLConnection) url.openConnection();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    connection.setRequestMethod("POST");
+                } catch (ProtocolException e) {
+                    e.printStackTrace();
+                }
+
+                // Read response
+                try {
+                    Log.i(TAG, "ResponseCode: " + connection.getResponseCode());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                InputStream in = null;
+                try {
+                    in = new BufferedInputStream(connection.getInputStream());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+               /* String response = "";
+                try {
+                    response = IOUtils.toString(in, "UTF-8");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                Log.i(TAG, "Response: " + response);*/
+
             }
         });
+    }
+
+    // Intredasting stuff -- review later
+    private static JSONArray loadFromDatabaseNew(String phpFileAddress){
+        JSONArray jsonArray = null;
+
+        try {
+            URL url = new URL(phpFileAddress);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.connect();
+
+            InputStream is = conn.getInputStream();
+            BufferedReader streamReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            StringBuilder responseStrBuilder = new StringBuilder();
+
+            String inputStr;
+            while ((inputStr = streamReader.readLine()) != null)
+                responseStrBuilder.append(inputStr);
+
+            jsonArray = new JSONArray(responseStrBuilder.toString());
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+
+        return jsonArray;
     }
 }
